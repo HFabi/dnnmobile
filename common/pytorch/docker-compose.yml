@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  pytorch:
+    build: .
+    stdin_open: true
+    ports:
+      - 8080:8080
+    volumes:
+      - ./notebooks:/pt/notebooks
+volumes:
+  notebooks:
+  

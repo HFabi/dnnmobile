@@ -1,0 +1,30 @@
+FROM ubuntu:22.04
+
+# update ubuntu, install python3, install pip
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip
+
+# install Torch
+RUN python3 -m pip install --no-cache-dir torch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1
+
+# install Jupyter Notebook
+RUN python3 -m pip install --no-cache-dir notebook matplotlib scikit-learn pandas setuptools wheel spacy gensim coremltools
+# RUN jupyter notebook --allow-root 
+
+RUN python3 -m spacy download en_core_web_sm
+
+# make directory that is mapped in volumes
+# allow read, write and execution in directory
+RUN mkdir -p /pt && chmod -R a+rwx /pt/
+
+# reference directory for the following commands
+WORKDIR /pt
+
+# expose port where notebook is running per default
+EXPOSE 8080
+
+# Run when the container launches
+#  --no-browser without opening a browser
+# --ip 0.0.0.0
+CMD ["bash", "-c", "jupyter notebook --notebook-dir=/pt --ip 0.0.0.0 --no-browser --port 8080 --allow-root"]

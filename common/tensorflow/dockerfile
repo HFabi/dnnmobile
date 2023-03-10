@@ -1,0 +1,8 @@
+FROM tensorflow/tensorflow:2.11.0-jupyter
+
+# install scikit-learn, install pandas
+RUN python3 -m pip install --no-cache-dir scikit-learn pandas setuptools wheel spacy gensim coremltools
+
+RUN python3 -m spacy download en_core_web_sm
+
+#CMD ["bash" "-c" "source /etc/bash.bashrc && jupyter notebook --notebook-dir=/tf --ip 0.0.0.0 --no-browser --allow-root"]

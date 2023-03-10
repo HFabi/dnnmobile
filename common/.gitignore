@@ -1,0 +1,10 @@
+# jupyter notebook
+.ipynb_checkpoints/
+
+# pytorch
+pytorch/notebooks/datasets
+pytorch/notebooks/mlmodels
+
+# tensorflow
+tensorflow/notebooks/datasets
+tensorflow/notebooks/mlmodels
