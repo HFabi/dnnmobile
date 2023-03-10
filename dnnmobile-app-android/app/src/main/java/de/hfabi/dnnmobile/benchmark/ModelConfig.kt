@@ -11,7 +11,7 @@ object ModelConfig {
     private const val tfModelDir = "tensorflow"
     private const val ptModelDir = "pytorch"
 
-    open class Dataset(
+    open class DnnDataset(
         var name: String,
         val trainInput: String,
         val trainTarget: String,
@@ -23,7 +23,7 @@ object ModelConfig {
         val testSampleCount: Int
     )
 
-    object FashionMnistSmall : Dataset(
+    object FashionMnistSmall : DnnDataset(
         name = "Fashion Mnist Small",
         trainInput = "$dataDir/fashion_mnist_600_train_input.csv",
         trainTarget = "$dataDir/fashion_mnist_600_train_target_categorical.csv",
@@ -35,7 +35,7 @@ object ModelConfig {
         testSampleCount = 100
     )
 
-    object BreastCancerWisconsin : Dataset(
+    object BreastCancerWisconsin : DnnDataset(
         name = "Breast Cancer Wisconsin",
         trainInput = "$dataDir/breastcancer_train_input.csv",
         trainTarget = "$dataDir/breastcancer_train_target.csv",
@@ -47,7 +47,7 @@ object ModelConfig {
         testSampleCount = 171
     )
 
-    object Mnist : Dataset(
+    object Mnist : DnnDataset(
         name = "Mnist",
         trainInput = "$dataDir/mnist_train_input.csv",
         trainTarget = "$dataDir/mnist_train_target_categorical.csv",
@@ -59,7 +59,7 @@ object ModelConfig {
         testSampleCount = 10000
     )
 
-    object MnistSmall : Dataset(
+    object MnistSmall : DnnDataset(
         name = "Mnist",
         trainInput = "$dataDir/mnist_600_train_input.csv",
         trainTarget = "$dataDir/mnist_600_train_target_categorical.csv",

@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct dnnmobileApp: App {
+    
+    let benchmarkViewModel = ContentViewModel()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(viewModel: benchmarkViewModel)
         }
     }
 }

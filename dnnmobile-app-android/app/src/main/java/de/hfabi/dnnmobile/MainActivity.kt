@@ -13,9 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import de.hfabi.dnnmobile.benchmark.ModelConfig
 import de.hfabi.dnnmobile.benchmark.TfBenchmark
+import de.hfabi.dnnmobile.ui.ContentView
+import de.hfabi.dnnmobile.ui.ContentViewModel
 import de.hfabi.dnnmobile.ui.theme.DnnmobileTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,49 +28,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             DnnmobileTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    var context = LocalContext.current
-                    Column(Modifier.padding(16.dp)) {
-                        Text(text = "On-Device Training")
-                        Divider()
-                        Text(text = "Breast Cancer Wisconsin")
-                        Row {
-                            Button(onClick = { trainingTfBreastCancerWisconsin() }) {
-                                Text(text = "TfLite - Train")
-                            }
-                            Button(onClick = { inferenceTfBreastCancerWisconsin() }) {
-                                Text(text = "TfLite - Infer")
-                            }
-                        }
-                        Divider()
-                    }
+                    ContentView(hiltViewModel<ContentViewModel>())
                 }
             }
-        }
-    }
-
-    private fun trainingTfBreastCancerWisconsin() {
-        lifecycleScope.launch(Dispatchers.Default) {
-            val benchmark = TfBenchmark(this@MainActivity,
-                modelPath = ModelConfig.Model.TensorFlow.BreastCancerWisconsin,
-                checkpointPath = "checkpointBCW",
-                numberOfEpochs = 10,
-                batchSize = 1,
-                dataset= ModelConfig.BreastCancerWisconsin)
-            benchmark.training()
-            benchmark.inferenceWithTrainedWeights(true)
-        }
-    }
-    private fun inferenceTfBreastCancerWisconsin() {
-        lifecycleScope.launch(Dispatchers.Default) {
-            val benchmark = TfBenchmark(this@MainActivity,
-                modelPath = ModelConfig.Model.TensorFlow.BreastCancerWisconsin,
-                checkpointPath = "checkpointBCW",
-                numberOfEpochs = 10,
-                batchSize = 1,
-                dataset= ModelConfig.BreastCancerWisconsin)
-            benchmark.inferenceWithTrainedWeights(true)
         }
     }
 }
@@ -77,6 +41,5 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DefaultPreview() {
     DnnmobileTheme {
-
     }
 }

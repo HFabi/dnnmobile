@@ -14,6 +14,14 @@
 		BDDDB80A29BA888B0087C361 /* dnnmobileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDDB80929BA888B0087C361 /* dnnmobileTests.swift */; };
 		BDDDB81429BA888B0087C361 /* dnnmobileUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDDB81329BA888B0087C361 /* dnnmobileUITests.swift */; };
 		BDDDB81629BA888B0087C361 /* dnnmobileUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDDDB81529BA888B0087C361 /* dnnmobileUITestsLaunchTests.swift */; };
+		BDECD72729BB4DAD0049FA0D /* DnnTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDECD72629BB4DAD0049FA0D /* DnnTimer.swift */; };
+		BDECD72929BB4DC10049FA0D /* ModelConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDECD72829BB4DC10049FA0D /* ModelConfig.swift */; };
+		BDECD72B29BB4DE10049FA0D /* TfBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDECD72A29BB4DE10049FA0D /* TfBenchmark.swift */; };
+		BDECD72D29BB4DEF0049FA0D /* CoreMlBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDECD72C29BB4DEF0049FA0D /* CoreMlBenchmark.swift */; };
+		BDECD72F29BB4E130049FA0D /* DnnLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDECD72E29BB4E130049FA0D /* DnnLogger.swift */; };
+		BDECD73229BB50150049FA0D /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDECD73129BB50150049FA0D /* ContentViewModel.swift */; };
+		BDECD73429BB532C0049FA0D /* BaseBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDECD73329BB532C0049FA0D /* BaseBenchmark.swift */; };
+		BDECD73729BB58770049FA0D /* MlUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDECD73629BB58770049FA0D /* MlUtils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +53,14 @@
 		BDDDB80F29BA888B0087C361 /* dnnmobileUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = dnnmobileUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDDDB81329BA888B0087C361 /* dnnmobileUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dnnmobileUITests.swift; sourceTree = "<group>"; };
 		BDDDB81529BA888B0087C361 /* dnnmobileUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dnnmobileUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		BDECD72629BB4DAD0049FA0D /* DnnTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DnnTimer.swift; sourceTree = "<group>"; };
+		BDECD72829BB4DC10049FA0D /* ModelConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelConfig.swift; sourceTree = "<group>"; };
+		BDECD72A29BB4DE10049FA0D /* TfBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TfBenchmark.swift; sourceTree = "<group>"; };
+		BDECD72C29BB4DEF0049FA0D /* CoreMlBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMlBenchmark.swift; sourceTree = "<group>"; };
+		BDECD72E29BB4E130049FA0D /* DnnLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DnnLogger.swift; sourceTree = "<group>"; };
+		BDECD73129BB50150049FA0D /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
+		BDECD73329BB532C0049FA0D /* BaseBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseBenchmark.swift; sourceTree = "<group>"; };
+		BDECD73629BB58770049FA0D /* MlUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MlUtils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,11 +111,15 @@
 		BDDDB7F629BA88890087C361 /* dnnmobile */ = {
 			isa = PBXGroup;
 			children = (
+				BDECD73529BB58660049FA0D /* utils */,
+				BDECD73029BB4FBB0049FA0D /* ui */,
+				BDECD72529BB4D970049FA0D /* benchmark */,
+				BDECD72429BB4D750049FA0D /* datasets */,
 				BDDDB7F729BA88890087C361 /* dnnmobileApp.swift */,
-				BDDDB7F929BA88890087C361 /* ContentView.swift */,
 				BDDDB7FB29BA888B0087C361 /* Assets.xcassets */,
 				BDDDB7FD29BA888B0087C361 /* dnnmobile.entitlements */,
 				BDDDB7FE29BA888B0087C361 /* Preview Content */,
+				BDECD72E29BB4E130049FA0D /* DnnLogger.swift */,
 			);
 			path = dnnmobile;
 			sourceTree = "<group>";
@@ -127,6 +147,42 @@
 				BDDDB81529BA888B0087C361 /* dnnmobileUITestsLaunchTests.swift */,
 			);
 			path = dnnmobileUITests;
+			sourceTree = "<group>";
+		};
+		BDECD72429BB4D750049FA0D /* datasets */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = datasets;
+			sourceTree = "<group>";
+		};
+		BDECD72529BB4D970049FA0D /* benchmark */ = {
+			isa = PBXGroup;
+			children = (
+				BDECD72629BB4DAD0049FA0D /* DnnTimer.swift */,
+				BDECD72829BB4DC10049FA0D /* ModelConfig.swift */,
+				BDECD72A29BB4DE10049FA0D /* TfBenchmark.swift */,
+				BDECD72C29BB4DEF0049FA0D /* CoreMlBenchmark.swift */,
+				BDECD73329BB532C0049FA0D /* BaseBenchmark.swift */,
+			);
+			path = benchmark;
+			sourceTree = "<group>";
+		};
+		BDECD73029BB4FBB0049FA0D /* ui */ = {
+			isa = PBXGroup;
+			children = (
+				BDDDB7F929BA88890087C361 /* ContentView.swift */,
+				BDECD73129BB50150049FA0D /* ContentViewModel.swift */,
+			);
+			path = ui;
+			sourceTree = "<group>";
+		};
+		BDECD73529BB58660049FA0D /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				BDECD73629BB58770049FA0D /* MlUtils.swift */,
+			);
+			path = utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -259,8 +315,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDECD73229BB50150049FA0D /* ContentViewModel.swift in Sources */,
+				BDECD73429BB532C0049FA0D /* BaseBenchmark.swift in Sources */,
 				BDDDB7FA29BA88890087C361 /* ContentView.swift in Sources */,
 				BDDDB7F829BA88890087C361 /* dnnmobileApp.swift in Sources */,
+				BDECD72B29BB4DE10049FA0D /* TfBenchmark.swift in Sources */,
+				BDECD72F29BB4E130049FA0D /* DnnLogger.swift in Sources */,
+				BDECD72D29BB4DEF0049FA0D /* CoreMlBenchmark.swift in Sources */,
+				BDECD72729BB4DAD0049FA0D /* DnnTimer.swift in Sources */,
+				BDECD73729BB58770049FA0D /* MlUtils.swift in Sources */,
+				BDECD72929BB4DC10049FA0D /* ModelConfig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

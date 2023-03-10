@@ -17,7 +17,7 @@ class TfBenchmark(
     var checkpointPath: String,
     var numberOfEpochs: Int,
     var batchSize: Int,
-    var dataset: ModelConfig.Dataset
+    var dataset: ModelConfig.DnnDataset
 ) : BaseBenchmark() {
 
     private val numberOfBatches = dataset.trainSampleCount / batchSize
