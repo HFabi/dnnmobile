@@ -24,7 +24,12 @@ protocol DnnModel {
     var fileName: String { get }
 }
 
-protocol CoreMlDnnModel: DnnModel { }
+protocol CoreMlDnnModel: DnnModel {
+    var featureLabelInput: String { get }
+    var featureLabelOutput: String { get }
+    var featureLabelOutputClass: String { get }
+    var allowedEpochs: Array<Int> { get }
+}
 
 extension CoreMlDnnModel {
     var fileName: String {
@@ -87,6 +92,10 @@ struct ModelConfig {
     }
     
     struct CoreMlMnist: CoreMlDnnModel {
+        var featureLabelInput = "ip_1_input"
+        var featureLabelOutput = "ip_6_output"
+        var featureLabelOutputClass = "ip_6_output_true"
+        var allowedEpochs = [50]
         let bundleName = "MNIST100-500Updatable"
     }
 }

@@ -10,9 +10,14 @@ import CoreML
 import Vision
 
 class CoreMlBenchmark: BaseBenchmark {
-    var updatableModel: MLModel?
-    var initialModel: MLModel?
-    var dnnModel: DnnModel
+    var updatableModel: MLModel? = nil
+    var initialModel: MLModel? = nil
+    var dnnModel: CoreMlDnnModel
+    
+    var featuresInput: Int
+    var featuresTarget: Int
+    var trainSampleCount: Int
+    var testSampleCount: Int
     
     var trainInputPath: String
     var trainTargetPath: String
@@ -20,19 +25,26 @@ class CoreMlBenchmark: BaseBenchmark {
     var testTargetPath: String
     
     init(
-        dnnModel: DnnModel,
+        dnnModel: CoreMlDnnModel,
         dataset: DnnDataset
     ) {
         self.dnnModel = dnnModel
+        self.featuresInput = dataset.featuresInput
+        self.featuresTarget = dataset.featuresTarget
+        self.trainSampleCount = dataset.trainSampleCount
+        self.testSampleCount = dataset.testSampleCount
         self.trainInputPath = Bundle.main.url(forResource: dataset.trainInput, withExtension: "csv")!.relativePath
         self.trainTargetPath = Bundle.main.url(forResource: dataset.trainTarget, withExtension: "csv")!.relativePath
         self.testInputPath = Bundle.main.url(forResource: dataset.testInput, withExtension: "csv")!.relativePath
         self.testTargetPath = Bundle.main.url(forResource: dataset.testTarget, withExtension: "csv")!.relativePath
         
+        super.init()
+        
         guard let modelURL = Bundle.main.url(forResource: dnnModel.fileName, withExtension: "mlmodelc") else {
             DnnLogger.logE(message: "Could not find model in bundle")
             return
         }
+        
         guard let model = loadModel(url: modelURL) else {
             DnnLogger.logE(message: "Could not load model from bundle")
             return
@@ -52,84 +64,89 @@ class CoreMlBenchmark: BaseBenchmark {
         }
     }
     
-    
+    /// Inference of CoreML model
+    ///
+    /// - Parameters
+    ///     - featureProviderDict: input
+    /// - Returns
     func inference(featureProviderDict: MLDictionaryFeatureProvider)->Int? {
         guard let model = self.updatableModel else {
-            print("inference, updatable model nil")
+            DnnLogger.logE(message: "Tried to run inference, but no model found for inference")
             return nil
         }
         
-        var predictionValue:Int? = nil
+        var predictionValue: Int? = nil
         do {
             let prediction: MLFeatureProvider = try model.prediction(from: featureProviderDict)
-            let m:MLMultiArray? = prediction.featureValue(for: self.feature_label_output)!.multiArrayValue
-            
-            let output = multiArrayToArray(multiArray: m!)
-            predictionValue = argmax(data: output)
+            let outputMultiArray: MLMultiArray? = prediction.featureValue(for: self.dnnModel.featureLabelOutput)!.multiArrayValue
+            let output = MlUtils.multiArrayToArray(multiArray: outputMultiArray!)
+            predictionValue = MlUtils.argmax(data: output)
         } catch(let error){
-            print("error is \(error.localizedDescription)")
+            DnnLogger.logE(error: error, message: "Inference failed: \(error.localizedDescription)")
         }
         return predictionValue
     }
     
-    func training() {
-        print("training mnist")
-        //
+    
+    func groupInference() {
+        do {
+            let batchprovider = prepareBatchProviderCSV(filePathInput: testInputPath, filePathTarget: testTargetPath)
+            for i in 0..<20 {
+                let feature = batchprovider.features(at: i)
+                let data = feature.featureValue(for: self.dnnModel.featureLabelInput)
+                let label = feature.featureValue(for: self.dnnModel.featureLabelOutputClass)
+                let featureProviderDict = try MLDictionaryFeatureProvider(dictionary: [self.dnnModel.featureLabelInput : data])
+                let prediction = inference(featureProviderDict: featureProviderDict)
+                if (prediction != nil) {
+                    DnnLogger.logD(message: "\(String(describing: label)) \(prediction!)")
+                } else {
+                    DnnLogger.logD(message: "\(String(describing: label)) prediction nil")
+                }
+            }
+        } catch(let error){
+            DnnLogger.logE(error: error, message: "In group inference")
+        }
+        accurcy(sampleCount: 100)
+    }
+    
+    
+    /// Training of CoreML model
+    func training(epochs: Int) {
+        // configure
         let modelConfig = MLModelConfiguration()
         modelConfig.computeUnits = .cpuOnly
-        modelConfig.parameters = [MLParameterKey.epochs : 50]
+        modelConfig.parameters = [MLParameterKey.epochs : epochs]
         
         // load from document directory?
         let fileManager = FileManager.default
         let documentDirectory = try! fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor:nil, create:true)
-        var modelURL = Bundle.main.url(forResource: modelresourcename, withExtension: "mlmodelc")!
-        let pathOfFile = documentDirectory.appendingPathComponent(modelresourcenamewithending)
+        var modelURL = Bundle.main.url(forResource: self.dnnModel.bundleName, withExtension: "mlmodelc")!
+        let pathOfFile = documentDirectory.appendingPathComponent(self.dnnModel.fileName)
         if fileManager.fileExists(atPath: pathOfFile.path){
             modelURL = pathOfFile
         }
         
-        let start = DispatchTime.now()
+        timer.notifyTrainingStarted()
         do {
-            let batchProvider = try prepareBatchProviderCSV(filePathInput: trainInputPath, filePathTarget: trainTargetPath)
+            let batchProvider = prepareBatchProviderCSV(filePathInput: trainInputPath, filePathTarget: trainTargetPath)
             
             let updateTask = try MLUpdateTask(forModelAt: modelURL, trainingData: batchProvider, configuration: modelConfig, progressHandlers: MLUpdateProgressHandlers(forEvents: [.trainingBegin,.miniBatchEnd, .epochEnd], progressHandler: { (contextProgress) in
-                
-                switch contextProgress.event {
-                case .trainingBegin:
-                    print("Training begin")
-                    
-                case .miniBatchEnd:
-                    let batchIndex = contextProgress.metrics[.miniBatchIndex] as! Int
-                    let batchLoss = contextProgress.metrics[.lossValue] as! Double
-                    
-                case .epochEnd:
-                    let epochIndex = contextProgress.metrics[.epochIndex] as! Int
-                    let trainLoss = contextProgress.metrics[.lossValue] as! Double
-                    print("Epoch end \(epochIndex), loss: \(trainLoss)")
-                    
-                default:
-                    print("switch default")
-                }
-                
+                self.logProgress(updateContext: contextProgress)
             }) { (finalContext) in
                 if finalContext.task.error?.localizedDescription == nil
                 {
-                    let end = DispatchTime.now()
-                    let nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds
-                    print("TIME TRAINING:: \(nanoTime) \(Double(nanoTime)/1000.0/1000.0) in nanoseconds")
-                    print("training end")
+                    self.timer.notifyTrainingStopped()
+                    DnnLogger.logD(message: "Training finished: \(self.timer.description)")
                     
                     let fileManager = FileManager.default
                     do {
-                        print("training before update")
                         // write trained model to file
-                        let documentDirectory = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor:nil, create:true)
-                        let fileURL = documentDirectory.appendingPathComponent(self.modelresourcenamewithending)
+                        let documentDirectory = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create:true)
+                        let fileURL = documentDirectory.appendingPathComponent(self.dnnModel.fileName)
                         try finalContext.model.write(to: fileURL)
                         
                         // replace our model with the trained instance for next inference
                         self.updatableModel = self.loadModel(url: fileURL)
-                        print("training after update")
                         
                         self.groupInference() // TODO
                         
@@ -137,15 +154,100 @@ class CoreMlBenchmark: BaseBenchmark {
                         print("error is \(error.localizedDescription)")
                     }
                 } else {
-                    print("localizedDescription == nil")
-                    print("error is \(finalContext.task.error?.localizedDescription)")
+                    print("error is \(String(describing: finalContext.task.error?.localizedDescription))")
                 }
             })
             updateTask.resume()
         } catch(let error) {
-            print("error is \(error.localizedDescription)")
+            DnnLogger.logE(error: error)
         }
     }
     
+    /// Helper to prepare
+    ///
+    func prepareBatchProviderCSV(filePathInput: String, filePathTarget: String) -> MLBatchProvider {
+        // https://github.com/JacopoMangiavacchi/MNIST-CoreML-Training/blob/master/MNIST-CoreML-Training/MNIST.swift
+        var featureProviders = [MLFeatureProvider]()
+        var allInputMultiArrays: [MLMultiArray] = []
+        var sampleCounter = 0
+        errno = 0
+        
+        // read input data from csv
+        if freopen(filePathInput, "r", stdin) == nil {
+            DnnLogger.logE(message: "Error open file \(filePathInput)")
+        }
+        while let line = readLine()?.split(separator: ",") {
+            let inputMultiArray = try! MLMultiArray(shape: [NSNumber(value: self.featuresInput)], dataType: .float32)
+            for i in 0..<self.featuresInput {
+                inputMultiArray[i] = NSNumber(value: Float32(String(line[i]))!)
+            }
+            allInputMultiArrays.append(inputMultiArray)
+        }
+        if freopen(filePathTarget, "r", stdin) == nil {
+            DnnLogger.logE(message: "Error open file \(filePathTarget)")
+        }
+        
+        // read target data from csv
+        while let line = readLine()?.split(separator: ",") {
+            // read target
+            let outputMultiArray = try! MLMultiArray(shape: [1], dataType: .int32)
+            for i in 0..<self.featuresTarget {
+                if (Float(String(line[i]))! == 1.0) {
+                    outputMultiArray[0] = NSNumber(value: Float32(i))
+                }
+            }
+            
+            // combine input and target to feature provider
+            let inputValue = MLFeatureValue(multiArray: allInputMultiArrays[sampleCounter])
+            let targetValue = MLFeatureValue(multiArray: outputMultiArray)
+            
+            let dataPointFeatures: [String: MLFeatureValue] = [self.dnnModel.featureLabelInput: inputValue, self.dnnModel.featureLabelOutputClass: targetValue]
+            
+            if let provider = try? MLDictionaryFeatureProvider(dictionary: dataPointFeatures) {
+                featureProviders.append(provider)
+            }
+            sampleCounter += 1
+        }
+        return MLArrayBatchProvider(array: featureProviders)
+    }
     
+    func logProgress(updateContext: MLUpdateContext) {
+        switch updateContext.event {
+        case .trainingBegin:
+            DnnLogger.logD(message: "Training started")
+        case .miniBatchEnd:
+            let batchIndex = updateContext.metrics[.miniBatchIndex] as! Int
+            let batchLoss = updateContext.metrics[.lossValue] as! Double
+            // log?
+        case .epochEnd:
+            let epochIndex = updateContext.metrics[.epochIndex] as! Int
+            let trainLoss = updateContext.metrics[.lossValue] as! Double
+            DnnLogger.logD(message: "Epoch end \(epochIndex), loss: \(trainLoss)")
+        default:
+            break
+        }
+    }
+    
+    func accurcy(sampleCount: Int) {
+        var counter: Float = 0.0
+        do {
+            let batchprovider = prepareBatchProviderCSV(filePathInput: testInputPath, filePathTarget: testTargetPath)
+            for i in 0..<sampleCount {
+                let feature = batchprovider.features(at: i)
+                let data = feature.featureValue(for: self.dnnModel.featureLabelInput)
+                let label = feature.featureValue(for: self.dnnModel.featureLabelOutputClass)
+                let featureProviderDict = try MLDictionaryFeatureProvider(dictionary: [self.dnnModel.featureLabelInput : data])
+                let prediction = inference(featureProviderDict: featureProviderDict)
+                
+                let labelInt = MlUtils.multiArrayToInt(multiArray: label!.multiArrayValue!)
+                if (prediction != nil && prediction! == labelInt) {
+                    counter += 1
+                }
+            }
+            var accuracy = counter / Float(sampleCount)
+            print("accuracy \(accuracy)")
+        } catch(let error){
+            print("error groupInference description is \(error.localizedDescription)")
+        }
+    }
 }

@@ -18,32 +18,32 @@ class DnnTimer {
     var durationInference: Double = 0
     var durationTraining: Double = 0
     
-    var startSetupUptimeMillis: Double = 0
-    var startInferenceUptimeMillis: Double = 0
-    var startTrainingUptimeMillis: Double = 0
+    var startSetupUptimeMillis: UInt64 = 0
+    var startInferenceUptimeMillis: UInt64 = 0
+    var startTrainingUptimeMillis: UInt64 = 0
     
     func notifySetupStarted() {
-        startSetupUptimeMillis = CFAbsoluteTimeGetCurrent()
+        startSetupUptimeMillis = DispatchTime.now().uptimeNanoseconds
     }
     
     func notifySetupStopped() {
-        durationSetup = CFAbsoluteTimeGetCurrent() - startSetupUptimeMillis
+        durationSetup = Double(DispatchTime.now().uptimeNanoseconds - startSetupUptimeMillis)/1000.0/1000.0
     }
     
     func notifyInferenceStarted() {
-        startInferenceUptimeMillis = CFAbsoluteTimeGetCurrent()
+        startInferenceUptimeMillis = DispatchTime.now().uptimeNanoseconds
     }
     
     func notifyInferenceStopped() {
-        durationInference = CFAbsoluteTimeGetCurrent() - startInferenceUptimeMillis
+        durationInference = Double(DispatchTime.now().uptimeNanoseconds - startInferenceUptimeMillis)/1000.0/1000.0
     }
     
     func notifyTrainingStarted() {
-        startTrainingUptimeMillis = CFAbsoluteTimeGetCurrent()
+        startTrainingUptimeMillis = DispatchTime.now().uptimeNanoseconds
     }
     
     func notifyTrainingStopped() {
-        durationTraining = CFAbsoluteTimeGetCurrent() - startTrainingUptimeMillis
+        durationTraining = Double(DispatchTime.now().uptimeNanoseconds - startTrainingUptimeMillis)/1000.0/1000.0
     }
     
     public var description: String {

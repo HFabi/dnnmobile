@@ -10,7 +10,9 @@ import CoreML
 
 struct MlUtils {
     
-    func argmax(data: [Float])-> Int {
+
+    
+    static func argmax(data: [Float])-> Int {
         var maxvalue:Float = 0.0
         var maxindex = 0
         for i in 0..<data.count {
@@ -22,7 +24,7 @@ struct MlUtils {
         return maxindex
     }
     
-    func multiArrayToArray(multiArray: MLMultiArray)-> [Float] {
+    static func multiArrayToArray(multiArray: MLMultiArray)-> [Float] {
         let length = multiArray.count
         let floatPtr =  multiArray.dataPointer.bindMemory(to: Float.self, capacity: length)
         let floatBuffer = UnsafeBufferPointer(start: floatPtr, count: length)
@@ -30,7 +32,7 @@ struct MlUtils {
         return output
     }
     
-    func multiArrayToInt(multiArray: MLMultiArray)-> Int {
+    static func multiArrayToInt(multiArray: MLMultiArray)-> Int {
         let length = multiArray.count
         let intPtr =  multiArray.dataPointer.bindMemory(to: Int32.self, capacity: length)
         let intBuffer = UnsafeBufferPointer(start: intPtr, count: length)
